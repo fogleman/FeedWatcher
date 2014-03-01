@@ -59,7 +59,11 @@ define(function(require) {
     });
 
     var Items = Backbone.Collection.extend({
-        model: Item
+        model: Item,
+        comparator: function(item) {
+            var date = new Date(item.get('timestamp'));
+            return -date.getTime();
+        }
     });
 
     var ItemList = Backbone.View.extend({
@@ -67,8 +71,7 @@ define(function(require) {
         template: _.template(require('text!templates/item-list.html')),
         initialize: function(options) {
             this.items = options.items;
-            this.listenTo(this.items, 'add', this.render);
-            this.listenTo(this.items, 'remove', this.render);
+            this.listenTo(this.items, 'add remove reset sort', this.render);
         },
         render: function() {
             this.$el.empty();
@@ -81,13 +84,11 @@ define(function(require) {
     var poll = function(feeds, items) {
         feeds.each(function(feed) {
             var url = feed.get('url');
-            console.log(url);
             url = encodeURIComponent(url);
             url = FEED_SERVER + '?callback=?&url=' + url;
             $.getJSON(url, function(data) {
-                _.each(data.entries, function(entry) {
-                    items.add(entry);
-                });
+                items.add(data.entries);
+                items.sort();
             });
         });
     };
@@ -95,7 +96,7 @@ define(function(require) {
     var watch = function(feeds, items) {
         function func() {
             poll(feeds, items);
-            setTimeout(func, 10000);
+            setTimeout(func, 30000);
         }
         func();
     };
