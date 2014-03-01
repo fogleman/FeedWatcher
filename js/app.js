@@ -61,9 +61,6 @@ define(function(require) {
     });
 
     var Item = Backbone.Model.extend({
-        fromNow: function() {
-            return moment.utc(this.get('timestamp')).fromNow();
-        }
     });
 
     var Items = Backbone.Collection.extend({
@@ -89,9 +86,10 @@ define(function(require) {
                 this.$el.prepend(this.template({
                     title: item.get('title'),
                     link: item.get('link'),
-                    fromNow: item.fromNow()
+                    timestamp: item.get('timestamp')
                 }));
             }, this);
+            updateTimestamps();
         }
     });
 
@@ -122,11 +120,20 @@ define(function(require) {
 
     var watch = function(feeds, itemList) {
         function func() {
+            updateTimestamps();
             poll(feeds, itemList);
             setTimeout(func, 5000);
         }
         feeds.on('add', func);
         func();
+    };
+
+    var updateTimestamps = function() {
+        $('.timestamp').each(function() {
+            var timestamp = $(this).attr('data-timestamp');
+            var html = moment.utc(timestamp).fromNow();
+            $(this).html(html);
+        });
     };
 
     var Router = Backbone.Router.extend({
