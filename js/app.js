@@ -10,18 +10,22 @@ define(function(require) {
         },
         initialize: function(options) {
             this.feeds = options.feeds;
-            this.items = options.items;
         },
         onSubmit: function(event) {
             event.preventDefault();
             var url = this.$('input').val();
             this.$('input').val('');
             this.feeds.add({url: url});
-            poll(this.feeds, this.items);
         }
     });
 
     var Feed = Backbone.Model.extend({
+        initialize: function() {
+            this.interval = 30000;
+            this.timestamp = 0;
+            this.etag = null;
+            this.modified = null;
+        }
     });
 
     var Feeds = Backbone.Collection.extend({
@@ -62,42 +66,51 @@ define(function(require) {
         model: Item,
         comparator: function(item) {
             var date = new Date(item.get('timestamp'));
-            return -date.getTime();
+            return date.getTime();
         }
     });
 
     var ItemList = Backbone.View.extend({
         el: '#item-list',
         template: _.template(require('text!templates/item-list.html')),
-        initialize: function(options) {
-            this.items = options.items;
-            this.listenTo(this.items, 'add remove reset sort', this.render);
-        },
-        render: function() {
-            this.$el.empty();
-            this.items.each(function(item) {
-                this.$el.append(this.template(item.attributes));
+        addItems: function(items) {
+            items.each(function(item) {
+                this.$el.prepend(this.template(item.attributes));
             }, this);
         }
     });
 
-    var poll = function(feeds, items) {
+    var poll = function(feeds, itemList) {
+        var now = new Date().getTime();
         feeds.each(function(feed) {
+            if (now - feed.timestamp < feed.interval) {
+                return;
+            }
+            feed.timestamp = now;
             var url = feed.get('url');
-            url = encodeURIComponent(url);
-            url = FEED_SERVER + '?callback=?&url=' + url;
+            console.log(url);
+            url = FEED_SERVER + '?callback=?&url=' + encodeURIComponent(url);
+            if (feed.etag !== null) {
+                url += '&etag=' + encodeURIComponent(feed.etag);
+            }
+            if (feed.modified !== null) {
+                url += '&modified=' + encodeURIComponent(feed.modified);
+            }
             $.getJSON(url, function(data) {
-                items.add(data.entries);
-                items.sort();
+                feed.etag = data.etag;
+                feed.modified = data.modified;
+                var items = new Items(data.entries);
+                itemList.addItems(items);
             });
         });
     };
 
-    var watch = function(feeds, items) {
+    var watch = function(feeds, itemList) {
         function func() {
-            poll(feeds, items);
-            setTimeout(func, 30000);
+            poll(feeds, itemList);
+            setTimeout(func, 5000);
         }
+        feeds.on('add', func);
         func();
     };
 
@@ -107,11 +120,10 @@ define(function(require) {
         },
         index: function() {
             var feeds = new Feeds();
-            var items = new Items();
-            new UrlForm({feeds: feeds, items: items});
+            var itemList = new ItemList();
+            new UrlForm({feeds: feeds});
             new FeedList({feeds: feeds});
-            new ItemList({items: items});
-            watch(feeds, items);
+            watch(feeds, itemList);
         }
     });
 
