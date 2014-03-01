@@ -1,6 +1,8 @@
 define(function(require) {
     var Backbone = require('backbone');
 
+    var FEED_SERVER = 'http://127.0.0.1:5000/';
+
     var UrlForm = Backbone.View.extend({
         el: '#url-form',
         events: {
@@ -8,12 +10,14 @@ define(function(require) {
         },
         initialize: function(options) {
             this.feeds = options.feeds;
+            this.items = options.items;
         },
         onSubmit: function(event) {
             event.preventDefault();
             var url = this.$('input').val();
             this.$('input').val('');
             this.feeds.add({url: url});
+            poll(this.feeds, this.items);
         }
     });
 
@@ -74,21 +78,26 @@ define(function(require) {
         }
     });
 
-    var watch = function(feeds, items) {
-        function poll() {
-            feeds.each(function(feed) {
-                var url = feed.get('url');
-                url = encodeURIComponent(url);
-                url = 'http://127.0.0.1:5000/?callback=?&url=' + url;
-                $.getJSON(url, function(data) {
-                    _.each(data.entries, function(entry) {
-                        items.add(entry);
-                    });
+    var poll = function(feeds, items) {
+        feeds.each(function(feed) {
+            var url = feed.get('url');
+            console.log(url);
+            url = encodeURIComponent(url);
+            url = FEED_SERVER + '?callback=?&url=' + url;
+            $.getJSON(url, function(data) {
+                _.each(data.entries, function(entry) {
+                    items.add(entry);
                 });
             });
-            setTimeout(poll, 10000);
+        });
+    };
+
+    var watch = function(feeds, items) {
+        function func() {
+            poll(feeds, items);
+            setTimeout(func, 10000);
         }
-        poll();
+        func();
     };
 
     var Router = Backbone.Router.extend({
@@ -98,7 +107,7 @@ define(function(require) {
         index: function() {
             var feeds = new Feeds();
             var items = new Items();
-            new UrlForm({feeds: feeds});
+            new UrlForm({feeds: feeds, items: items});
             new FeedList({feeds: feeds});
             new ItemList({items: items});
             watch(feeds, items);
