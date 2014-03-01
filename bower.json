@@ -1,0 +1,13 @@
+{
+  "name": "FeedWatcher",
+  "version": "0.0.0",
+  "dependencies": {
+    "jquery": "~1.11.0",
+    "backbone": "~1.1.2",
+    "requirejs-plugins": "~1.0.2",
+    "requirejs-text": "~2.0.10",
+    "requirejs": "~2.1.11",
+    "underscore": "~1.6.0",
+    "bootstrap": "~3.1.1"
+  }
+}
