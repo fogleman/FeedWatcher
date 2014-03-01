@@ -4,8 +4,8 @@ define(function(require) {
 
     var FEED_SERVER = 'http://127.0.0.1:5000/';
 
-    var UrlForm = Backbone.View.extend({
-        el: '#url-form',
+    var FeedForm = Backbone.View.extend({
+        el: '#feed-form',
         events: {
             'submit': 'onSubmit'
         },
@@ -33,12 +33,12 @@ define(function(require) {
         model: Feed
     });
 
-    var FeedList = Backbone.View.extend({
-        el: '#feed-list',
+    var FeedsView = Backbone.View.extend({
+        el: '#feeds',
         events: {
             'click button': 'onUnwatch'
         },
-        template: _.template(require('text!templates/feed-list.html')),
+        template: _.template(require('text!templates/feeds.html')),
         initialize: function(options) {
             this.feeds = options.feeds;
             this.listenTo(this.feeds, 'add', this.render);
@@ -74,9 +74,9 @@ define(function(require) {
         }
     });
 
-    var ItemList = Backbone.View.extend({
-        el: '#item-list',
-        template: _.template(require('text!templates/item-list.html')),
+    var ItemsView = Backbone.View.extend({
+        el: '#items',
+        template: _.template(require('text!templates/items.html')),
         initialize: function() {
             this.memo = {};
         },
@@ -135,9 +135,9 @@ define(function(require) {
         },
         index: function() {
             var feeds = new Feeds();
-            var itemList = new ItemList();
-            new UrlForm({feeds: feeds});
-            new FeedList({feeds: feeds});
+            var itemList = new ItemsView();
+            new FeedForm({feeds: feeds});
+            new FeedsView({feeds: feeds});
             watch(feeds, itemList);
             // var url = 'http://stackoverflow.com/feeds';
             // feeds.add({url: url});
