@@ -1,5 +1,6 @@
 define(function(require) {
     var Backbone = require('backbone');
+    var moment = require('moment');
 
     var FEED_SERVER = 'http://127.0.0.1:5000/';
 
@@ -21,7 +22,7 @@ define(function(require) {
 
     var Feed = Backbone.Model.extend({
         initialize: function() {
-            this.interval = 30000;
+            this.interval = 60000;
             this.timestamp = 0;
             this.etag = null;
             this.modified = null;
@@ -60,6 +61,9 @@ define(function(require) {
     });
 
     var Item = Backbone.Model.extend({
+        fromNow: function() {
+            return moment.utc(this.get('timestamp')).fromNow();
+        }
     });
 
     var Items = Backbone.Collection.extend({
@@ -82,7 +86,11 @@ define(function(require) {
                     return;
                 }
                 this.memo[item.id] = true;
-                this.$el.prepend(this.template(item.attributes));
+                this.$el.prepend(this.template({
+                    title: item.get('title'),
+                    link: item.get('link'),
+                    fromNow: item.fromNow()
+                }));
             }, this);
         }
     });
@@ -131,6 +139,8 @@ define(function(require) {
             new UrlForm({feeds: feeds});
             new FeedList({feeds: feeds});
             watch(feeds, itemList);
+            // var url = 'http://stackoverflow.com/feeds';
+            // feeds.add({url: url});
         }
     });
 
