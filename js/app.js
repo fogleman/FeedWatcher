@@ -73,8 +73,15 @@ define(function(require) {
     var ItemList = Backbone.View.extend({
         el: '#item-list',
         template: _.template(require('text!templates/item-list.html')),
+        initialize: function() {
+            this.memo = {};
+        },
         addItems: function(items) {
             items.each(function(item) {
+                if (item.id in this.memo) {
+                    return;
+                }
+                this.memo[item.id] = true;
                 this.$el.prepend(this.template(item.attributes));
             }, this);
         }
