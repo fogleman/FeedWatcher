@@ -1,8 +1,18 @@
 define(function(require) {
     var Backbone = require('backbone');
     var moment = require('moment');
+    require('jqueryui');
 
     var FEED_SERVER = 'http://127.0.0.1:5000/';
+
+    var template = function(text) {
+        var settings = {
+            evaluate    : /\{%([\s\S]+?)%\}/g,
+            interpolate : /\{\{([\s\S]+?)\}\}/g,
+            escape      : /\{-([\s\S]+?)-\}/g
+        };
+        return _.template(text, undefined, settings);
+    };
 
     var FeedForm = Backbone.View.extend({
         el: '#feed-form',
@@ -38,7 +48,7 @@ define(function(require) {
         events: {
             'click button': 'onUnwatch'
         },
-        template: _.template(require('text!templates/feeds.html')),
+        template: template(require('text!templates/feeds.html')),
         initialize: function(options) {
             this.feeds = options.feeds;
             this.listenTo(this.feeds, 'add', this.render);
@@ -73,23 +83,32 @@ define(function(require) {
 
     var ItemsView = Backbone.View.extend({
         el: '#items',
-        template: _.template(require('text!templates/items.html')),
+        template: template(require('text!templates/items.html')),
         initialize: function() {
             this.memo = {};
         },
-        addItems: function(items) {
+        addItems: function(feed, items) {
+            var changed = false;
             items.each(function(item) {
                 if (item.id in this.memo) {
                     return;
                 }
+                changed = true;
                 this.memo[item.id] = true;
                 this.$el.prepend(this.template({
+                    feed_title: feed.get('title'),
+                    feed_link: feed.get('link'),
                     title: item.get('title'),
                     link: item.get('link'),
                     timestamp: item.get('timestamp')
                 }));
+                var row = this.$('tr').first();
+                row.css({backgroundColor: '#fff3a5'});
+                row.animate({backgroundColor: '#ffffff'}, 1000);
             }, this);
-            updateTimestamps();
+            if (changed) {
+                updateTimestamps();
+            }
         }
     });
 
@@ -112,8 +131,9 @@ define(function(require) {
             $.getJSON(url, function(data) {
                 feed.etag = data.etag;
                 feed.modified = data.modified;
+                feed.set(data.feed);
                 var items = new Items(data.entries);
-                itemList.addItems(items);
+                itemList.addItems(feed, items);
             });
         });
     };
@@ -146,8 +166,8 @@ define(function(require) {
             new FeedForm({feeds: feeds});
             new FeedsView({feeds: feeds});
             watch(feeds, itemList);
-            // var url = 'http://stackoverflow.com/feeds';
-            // feeds.add({url: url});
+            var url = 'http://stackoverflow.com/feeds/tag?tagnames=python&sort=newest';
+            feeds.add({url: url});
         }
     });
 
