@@ -1,11 +1,12 @@
 <tr>
     <td>
-        <p class="lead" style="margin: 0;">
-            <a target="_blank" href="{{ link }}">{{ title }}</a>
-        </p>
-        <p style="color: #999;">{{ feed_title }}</p>
+        <div class="item-title">{{ title }}</div>
+        <div class="feed-title">{{ feed_title }}</div>
     </td>
     <td style="white-space: nowrap;">
-        <span class="timestamp" data-timestamp="{{ timestamp }}"></span>
+        <div class="item-timestamp">
+            <span class="timestamp" title="{{ timestamp }}" data-timestamp="{{ timestamp }}"></span>
+        </div>
+        <div class="item-author">by {{ author }}</div>
     </td>
 </tr>

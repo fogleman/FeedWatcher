@@ -1,0 +1,17 @@
+.item-title {
+    font-size: 21px;
+    font-weight: 200;
+    color: #428bca;
+}
+
+.item-author {
+    color: #999;
+}
+
+.feed-title {
+    color: #999;
+}
+
+.read, .read .item-title, .read .item-author, .read .feed-title {
+    color: #ccc;
+}

@@ -7,9 +7,9 @@ define(function(require) {
 
     var template = function(text) {
         var settings = {
-            evaluate    : /\{%([\s\S]+?)%\}/g,
+            evaluate    : /\{\%([\s\S]+?)\%\}/g,
             interpolate : /\{\{([\s\S]+?)\}\}/g,
-            escape      : /\{-([\s\S]+?)-\}/g
+            escape      : /\{\-([\s\S]+?)\-\}/g
         };
         return _.template(text, undefined, settings);
     };
@@ -100,11 +100,16 @@ define(function(require) {
                     feed_link: feed.get('link'),
                     title: item.get('title'),
                     link: item.get('link'),
+                    author: item.get('author'),
                     timestamp: item.get('timestamp')
                 }));
                 var row = this.$('tr').first();
                 row.css({backgroundColor: '#fff3a5'});
                 row.animate({backgroundColor: '#ffffff'}, 1000);
+                row.click(function() {
+                    window.open(item.get('link'), '_blank');
+                    $(this).addClass('read');
+                });
             }, this);
             if (changed) {
                 updateTimestamps();
@@ -166,8 +171,8 @@ define(function(require) {
             new FeedForm({feeds: feeds});
             new FeedsView({feeds: feeds});
             watch(feeds, itemList);
-            var url = 'http://stackoverflow.com/feeds/tag?tagnames=python&sort=newest';
-            feeds.add({url: url});
+            feeds.add({url: 'http://stackoverflow.com/feeds/tag?tagnames=python&sort=newest'});
+            feeds.add({url: 'http://www.npr.org/rss/rss.php?id=1001'})
         }
     });
 

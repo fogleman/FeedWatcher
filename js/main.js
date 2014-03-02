@@ -28,6 +28,7 @@ require.config({
         jquery: '../bower_components/jquery/dist/jquery',
         jqueryui: '../bower_components/jqueryui/ui/jquery-ui',
         moment: '../bower_components/momentjs/moment',
+        spinjs: '../bower_components/spinjs/spin',
         text: '../bower_components/requirejs-text/text',
         underscore: '../bower_components/underscore/underscore',
     }
