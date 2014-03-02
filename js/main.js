@@ -1,13 +1,6 @@
 require.config({
     urlArgs: 'bust=' + (new Date()).getTime(),
     shim: {
-        backbone: {
-            deps: [
-                'underscore',
-                'jquery'
-            ],
-            exports: 'Backbone'
-        },
         bootstrap: {
             deps: [
                 'jquery'
@@ -17,9 +10,6 @@ require.config({
             deps: [
                 'jquery'
             ]
-        },
-        underscore: {
-            exports: '_'
         }
     },
     paths: {

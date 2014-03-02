@@ -172,7 +172,7 @@ define(function(require) {
             new FeedsView({feeds: feeds});
             watch(feeds, itemList);
             feeds.add({url: 'http://stackoverflow.com/feeds/tag?tagnames=python&sort=newest'});
-            feeds.add({url: 'http://www.npr.org/rss/rss.php?id=1001'})
+            // feeds.add({url: 'http://www.npr.org/rss/rss.php?id=1001'})
         }
     });
 
